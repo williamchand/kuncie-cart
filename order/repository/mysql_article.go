@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bxcodec/go-clean-arch/order"
 	"github.com/sirupsen/logrus"
+	"github.com/williamchand/kuncie-cart/order"
 
 	"github.com/williamchandra/kuncie-cart/models"
 )

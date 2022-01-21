@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/bxcodec/go-clean-arch/order"
+	"github.com/williamchand/kuncie-cart/order"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/williamchandra/kuncie-cart/author"
