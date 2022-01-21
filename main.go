@@ -15,10 +15,10 @@ import (
 	"github.com/spf13/viper"
 	"github.com/graphql-go/handler"
 
-	_orderHttpDeliver "github.com/williamchandra/kuncie-cart/order/delivery/http"
-	_graphQLOrderDelivery "github.com/williamchandra/kuncie-cart/order/delivery/graphql"
-	_orderRepo "github.com/williamchandra/kuncie-cart/order/repository"
-	_orderUcase "github.com/williamchandra/kuncie-cart/order/usecase"
+	_orderHttpDeliver "github.com/williamchand/kuncie-cart/order/delivery/http"
+	_graphQLOrderDelivery "github.com/williamchand/kuncie-cart/order/delivery/graphql"
+	_orderRepo "github.com/williamchand/kuncie-cart/order/repository"
+	_orderUcase "github.com/williamchand/kuncie-cart/order/usecase"
 	"github.com/williamchand/kuncie-cart/middleware"
 )
 
