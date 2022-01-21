@@ -15,11 +15,10 @@ import (
 	"github.com/spf13/viper"
 	"github.com/graphql-go/handler"
 
-	_articleHttpDeliver "github.com/williamchandra/kuncie-cart/article/delivery/http"
-	_graphQLArticleDelivery "github.com/williamchandra/kuncie-cart/article/delivery/graphql"
-	_articleRepo "github.com/williamchandra/kuncie-cart/article/repository"
-	_articleUcase "github.com/williamchandra/kuncie-cart/article/usecase"
-	_authorRepo "github.com/williamchandra/kuncie-cart/author/repository"
+	_orderHttpDeliver "github.com/williamchandra/kuncie-cart/order/delivery/http"
+	_graphQLOrderDelivery "github.com/williamchandra/kuncie-cart/order/delivery/graphql"
+	_orderRepo "github.com/williamchandra/kuncie-cart/order/repository"
+	_orderUcase "github.com/williamchandra/kuncie-cart/order/usecase"
 	"github.com/williamchandra/kuncie-cart/middleware"
 )
 
@@ -66,14 +65,13 @@ func main() {
 	e := echo.New()
 	middL := middleware.InitMiddleware()
 	e.Use(middL.CORS)
-	authorRepo := _authorRepo.NewMysqlAuthorRepository(dbConn)
-	ar := _articleRepo.NewMysqlArticleRepository(dbConn)
+	or := _orderRepo.NewMysqlOrderRepository(dbConn)
 
 	timeoutContext := time.Duration(viper.GetInt("context.timeout")) * time.Second
-	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
-	_articleHttpDeliver.NewArticleHandler(e, au)
+	ou := _orderUcase.NewOrderUsecase(or, timeoutContext)
+	_orderHttpDeliver.NewOrderHandler(e, ou)
 
-	schema := _graphQLArticleDelivery.NewSchema(_graphQLArticleDelivery.NewResolver(au))
+	schema := _graphQLOrderDelivery.NewSchema(_graphQLOrderDelivery.NewResolver(ou))
 	graphqlSchema, err := graphql.NewSchema(graphql.SchemaConfig{
 		Query:    schema.Query(),
 		Mutation: schema.Mutation(),

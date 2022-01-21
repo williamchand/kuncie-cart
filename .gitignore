@@ -1,6 +1,6 @@
 
 vendor/
-article_clean
+order_clean
 _*
 *.test
 .DS_Store

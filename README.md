@@ -3,8 +3,6 @@
 ## Description
 This is an implementation of Kuncie cart in Go (Golang) projects.
 
-Since the project already use Go Module, I recommend to put the source code in any folder but GOPATH.
-
 ### How To Run This Project
 > Make Sure you have run the database/20220121081800_cart.sql in your mysql
 

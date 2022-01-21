@@ -2,10 +2,10 @@ package graphql
 
 import "github.com/graphql-go/graphql"
 
-// ArticleGraphQL holds article information with graphql object
-var ArticleGraphQL = graphql.NewObject(
+// OrderGraphQL holds order information with graphql object
+var OrderGraphQL = graphql.NewObject(
 	graphql.ObjectConfig{
-		Name: "Article",
+		Name: "Order",
 		Fields: graphql.Fields{
 			"id": &graphql.Field{
 				Type: graphql.String,
@@ -26,13 +26,13 @@ var ArticleGraphQL = graphql.NewObject(
 	},
 )
 
-// ArticleEdgeGraphQL holds article edge information with graphql object
-var ArticleEdgeGraphQL = graphql.NewObject(
+// OrderEdgeGraphQL holds order edge information with graphql object
+var OrderEdgeGraphQL = graphql.NewObject(
 	graphql.ObjectConfig{
-		Name: "ArticleEdge",
+		Name: "OrderEdge",
 		Fields: graphql.Fields{
 			"node": &graphql.Field{
-				Type: ArticleGraphQL,
+				Type: OrderGraphQL,
 			},
 			"cursor": &graphql.Field{
 				Type: graphql.String,
@@ -41,13 +41,13 @@ var ArticleEdgeGraphQL = graphql.NewObject(
 	},
 )
 
-// ArticleResultGraphQL holds article result information with graphql object
-var ArticleResultGraphQL = graphql.NewObject(
+// OrderResultGraphQL holds order result information with graphql object
+var OrderResultGraphQL = graphql.NewObject(
 	graphql.ObjectConfig{
-		Name: "ArticleResult",
+		Name: "OrderResult",
 		Fields: graphql.Fields{
 			"edges": &graphql.Field{
-				Type: graphql.NewList(ArticleEdgeGraphQL),
+				Type: graphql.NewList(OrderEdgeGraphQL),
 			},
 			"pageInfo": &graphql.Field{
 				Type: pageInfoGraphQL,
@@ -72,7 +72,7 @@ var pageInfoGraphQL = graphql.NewObject(
 
 // Schema is struct which has method for Query and Mutation. Please init this struct using constructor function.
 type Schema struct {
-	articleResolver Resolver
+	orderResolver Resolver
 }
 
 // Query initializes config schema query for graphql server.
@@ -80,9 +80,9 @@ func (s Schema) Query() *graphql.Object {
 	objectConfig := graphql.ObjectConfig{
 		Name: "Query",
 		Fields: graphql.Fields{
-			"FetchArticle": &graphql.Field{
-				Type:        ArticleResultGraphQL,
-				Description: "Fetch Article",
+			"FetchOrder": &graphql.Field{
+				Type:        OrderResultGraphQL,
+				Description: "Fetch Order",
 				Args: graphql.FieldConfigArgument{
 					"first": &graphql.ArgumentConfig{
 						Type: graphql.Int,
@@ -91,27 +91,27 @@ func (s Schema) Query() *graphql.Object {
 						Type: graphql.String,
 					},
 				},
-				Resolve: s.articleResolver.FetchArticle,
+				Resolve: s.orderResolver.FetchOrder,
 			},
-			"GetArticleByID": &graphql.Field{
-				Type:        ArticleGraphQL,
-				Description: "Get Article By ID",
+			"GetOrderByID": &graphql.Field{
+				Type:        OrderGraphQL,
+				Description: "Get Order By ID",
 				Args: graphql.FieldConfigArgument{
 					"id": &graphql.ArgumentConfig{
 						Type: graphql.Int,
 					},
 				},
-				Resolve: s.articleResolver.GetArticleByID,
+				Resolve: s.orderResolver.GetOrderByID,
 			},
-			"GetArticleByTitle": &graphql.Field{
-				Type:        ArticleGraphQL,
-				Description: "Get Article By Title",
+			"GetOrderByTitle": &graphql.Field{
+				Type:        OrderGraphQL,
+				Description: "Get Order By Title",
 				Args: graphql.FieldConfigArgument{
 					"title": &graphql.ArgumentConfig{
 						Type: graphql.String,
 					},
 				},
-				Resolve: s.articleResolver.GetArticleByTitle,
+				Resolve: s.orderResolver.GetOrderByTitle,
 			},
 		},
 	}
@@ -124,9 +124,9 @@ func (s Schema) Mutation() *graphql.Object {
 	objectConfig := graphql.ObjectConfig{
 		Name: "Mutation",
 		Fields: graphql.Fields{
-			"UpdateArticle": &graphql.Field{
+			"UpdateOrder": &graphql.Field{
 				Type:        graphql.String,
-				Description: "Update article by certain ID",
+				Description: "Update order by certain ID",
 				Args: graphql.FieldConfigArgument{
 					"id": &graphql.ArgumentConfig{
 						Type: graphql.Int,
@@ -138,11 +138,11 @@ func (s Schema) Mutation() *graphql.Object {
 						Type: graphql.String,
 					},
 				},
-				Resolve: s.articleResolver.UpdateArticle,
+				Resolve: s.orderResolver.UpdateOrder,
 			},
-			"StoreArticle": &graphql.Field{
+			"StoreOrder": &graphql.Field{
 				Type:        graphql.String,
-				Description: "Store a new article",
+				Description: "Store a new order",
 				Args: graphql.FieldConfigArgument{
 					"title": &graphql.ArgumentConfig{
 						Type: graphql.String,
@@ -151,17 +151,17 @@ func (s Schema) Mutation() *graphql.Object {
 						Type: graphql.String,
 					},
 				},
-				Resolve: s.articleResolver.StoreArticle,
+				Resolve: s.orderResolver.StoreOrder,
 			},
-			"DeleteArticle": &graphql.Field{
+			"DeleteOrder": &graphql.Field{
 				Type:        graphql.String,
-				Description: "Delete an article by its ID",
+				Description: "Delete an order by its ID",
 				Args: graphql.FieldConfigArgument{
 					"id": &graphql.ArgumentConfig{
 						Type: graphql.Int,
 					},
 				},
-				Resolve: s.articleResolver.DeleteArticle,
+				Resolve: s.orderResolver.DeleteOrder,
 			},
 		},
 	}
@@ -170,8 +170,8 @@ func (s Schema) Mutation() *graphql.Object {
 }
 
 // NewSchema initializes Schema struct which takes resolver as the argument.
-func NewSchema(articleResolver Resolver) Schema {
+func NewSchema(orderResolver Resolver) Schema {
 	return Schema{
-		articleResolver: articleResolver,
+		orderResolver: orderResolver,
 	}
 }

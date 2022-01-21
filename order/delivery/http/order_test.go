@@ -15,32 +15,32 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	articleHttp "github.com/williamchandra/kuncie-cart/article/delivery/http"
-	"github.com/williamchandra/kuncie-cart/article/mocks"
+	orderHttp "github.com/williamchandra/kuncie-cart/order/delivery/http"
+	"github.com/williamchandra/kuncie-cart/order/mocks"
 	"github.com/williamchandra/kuncie-cart/models"
 )
 
 func TestFetch(t *testing.T) {
-	var mockArticle models.Article
-	err := faker.FakeData(&mockArticle)
+	var mockOrder models.Order
+	err := faker.FakeData(&mockOrder)
 	assert.NoError(t, err)
 	mockUCase := new(mocks.Usecase)
-	mockListArticle := make([]*models.Article, 0)
-	mockListArticle = append(mockListArticle, &mockArticle)
+	mockListOrder := make([]*models.Order, 0)
+	mockListOrder = append(mockListOrder, &mockOrder)
 	num := 1
 	cursor := "2"
-	mockUCase.On("Fetch", mock.Anything, cursor, int64(num)).Return(mockListArticle, "10", nil)
+	mockUCase.On("Fetch", mock.Anything, cursor, int64(num)).Return(mockListOrder, "10", nil)
 
 	e := echo.New()
-	req, err := http.NewRequest(echo.GET, "/article?num=1&cursor="+cursor, strings.NewReader(""))
+	req, err := http.NewRequest(echo.GET, "/order?num=1&cursor="+cursor, strings.NewReader(""))
 	assert.NoError(t, err)
 
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	handler := articleHttp.ArticleHandler{
+	handler := orderHttp.OrderHandler{
 		AUsecase: mockUCase,
 	}
-	err = handler.FetchArticle(c)
+	err = handler.FetchOrder(c)
 	require.NoError(t, err)
 
 	responseCursor := rec.Header().Get("X-Cursor")
@@ -56,15 +56,15 @@ func TestFetchError(t *testing.T) {
 	mockUCase.On("Fetch", mock.Anything, cursor, int64(num)).Return(nil, "", models.ErrInternalServerError)
 
 	e := echo.New()
-	req, err := http.NewRequest(echo.GET, "/article?num=1&cursor="+cursor, strings.NewReader(""))
+	req, err := http.NewRequest(echo.GET, "/order?num=1&cursor="+cursor, strings.NewReader(""))
 	assert.NoError(t, err)
 
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	handler := articleHttp.ArticleHandler{
+	handler := orderHttp.OrderHandler{
 		AUsecase: mockUCase,
 	}
-	err = handler.FetchArticle(c)
+	err = handler.FetchOrder(c)
 	require.NoError(t, err)
 
 	responseCursor := rec.Header().Get("X-Cursor")
@@ -74,26 +74,26 @@ func TestFetchError(t *testing.T) {
 }
 
 func TestGetByID(t *testing.T) {
-	var mockArticle models.Article
-	err := faker.FakeData(&mockArticle)
+	var mockOrder models.Order
+	err := faker.FakeData(&mockOrder)
 	assert.NoError(t, err)
 
 	mockUCase := new(mocks.Usecase)
 
-	num := int(mockArticle.ID)
+	num := int(mockOrder.ID)
 
-	mockUCase.On("GetByID", mock.Anything, int64(num)).Return(&mockArticle, nil)
+	mockUCase.On("GetByID", mock.Anything, int64(num)).Return(&mockOrder, nil)
 
 	e := echo.New()
-	req, err := http.NewRequest(echo.GET, "/article/"+strconv.Itoa(num), strings.NewReader(""))
+	req, err := http.NewRequest(echo.GET, "/order/"+strconv.Itoa(num), strings.NewReader(""))
 	assert.NoError(t, err)
 
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetPath("article/:id")
+	c.SetPath("order/:id")
 	c.SetParamNames("id")
 	c.SetParamValues(strconv.Itoa(num))
-	handler := articleHttp.ArticleHandler{
+	handler := orderHttp.OrderHandler{
 		AUsecase: mockUCase,
 	}
 	err = handler.GetByID(c)
@@ -104,32 +104,32 @@ func TestGetByID(t *testing.T) {
 }
 
 func TestStore(t *testing.T) {
-	mockArticle := models.Article{
+	mockOrder := models.Order{
 		Title:     "Title",
 		Content:   "Content",
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 
-	tempMockArticle := mockArticle
-	tempMockArticle.ID = 0
+	tempMockOrder := mockOrder
+	tempMockOrder.ID = 0
 	mockUCase := new(mocks.Usecase)
 
-	j, err := json.Marshal(tempMockArticle)
+	j, err := json.Marshal(tempMockOrder)
 	assert.NoError(t, err)
 
-	mockUCase.On("Store", mock.Anything, mock.AnythingOfType("*models.Article")).Return(nil)
+	mockUCase.On("Store", mock.Anything, mock.AnythingOfType("*models.Order")).Return(nil)
 
 	e := echo.New()
-	req, err := http.NewRequest(echo.POST, "/article", strings.NewReader(string(j)))
+	req, err := http.NewRequest(echo.POST, "/order", strings.NewReader(string(j)))
 	assert.NoError(t, err)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetPath("/article")
+	c.SetPath("/order")
 
-	handler := articleHttp.ArticleHandler{
+	handler := orderHttp.OrderHandler{
 		AUsecase: mockUCase,
 	}
 	err = handler.Store(c)
@@ -140,26 +140,26 @@ func TestStore(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	var mockArticle models.Article
-	err := faker.FakeData(&mockArticle)
+	var mockOrder models.Order
+	err := faker.FakeData(&mockOrder)
 	assert.NoError(t, err)
 
 	mockUCase := new(mocks.Usecase)
 
-	num := int(mockArticle.ID)
+	num := int(mockOrder.ID)
 
 	mockUCase.On("Delete", mock.Anything, int64(num)).Return(nil)
 
 	e := echo.New()
-	req, err := http.NewRequest(echo.DELETE, "/article/"+strconv.Itoa(num), strings.NewReader(""))
+	req, err := http.NewRequest(echo.DELETE, "/order/"+strconv.Itoa(num), strings.NewReader(""))
 	assert.NoError(t, err)
 
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetPath("article/:id")
+	c.SetPath("order/:id")
 	c.SetParamNames("id")
 	c.SetParamValues(strconv.Itoa(num))
-	handler := articleHttp.ArticleHandler{
+	handler := orderHttp.OrderHandler{
 		AUsecase: mockUCase,
 	}
 	err = handler.Delete(c)

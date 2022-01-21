@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-// Article represent the article model
-type Article struct {
+// Order represent the order model
+type Order struct {
 	ID        int64     `json:"id"`
 	Title     string    `json:"title" validate:"required"`
 	Content   string    `json:"content" validate:"required"`
