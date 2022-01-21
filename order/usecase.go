@@ -3,7 +3,7 @@ package order
 import (
 	"context"
 
-	"github.com/williamchandra/kuncie-cart/models"
+	"github.com/williamchand/kuncie-cart/models"
 )
 
 // Usecase represent the order's usecases

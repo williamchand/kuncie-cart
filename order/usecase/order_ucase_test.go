@@ -9,10 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/williamchandra/kuncie-cart/order/mocks"
-	ucase "github.com/williamchandra/kuncie-cart/order/usecase"
-	_authorMock "github.com/williamchandra/kuncie-cart/author/mocks"
-	"github.com/williamchandra/kuncie-cart/models"
+	"github.com/williamchand/kuncie-cart/models"
+	"github.com/williamchand/kuncie-cart/order/mocks"
+	ucase "github.com/williamchand/kuncie-cart/order/usecase"
 )
 
 func TestFetch(t *testing.T) {
@@ -32,9 +31,7 @@ func TestFetch(t *testing.T) {
 			ID:   1,
 			Name: "Iman Tumorang",
 		}
-		mockAuthorrepo := new(_authorMock.Repository)
-		mockAuthorrepo.On("GetByID", mock.Anything, mock.AnythingOfType("int64")).Return(mockAuthor, nil)
-		u := ucase.NewOrderUsecase(mockOrderRepo, mockAuthorrepo, time.Second*2)
+		u := ucase.NewOrderUsecase(mockOrderRepo, time.Second*2)
 		num := int64(1)
 		cursor := "12"
 		list, nextCursor, err := u.Fetch(context.TODO(), cursor, num)
@@ -52,8 +49,7 @@ func TestFetch(t *testing.T) {
 		mockOrderRepo.On("Fetch", mock.Anything, mock.AnythingOfType("string"),
 			mock.AnythingOfType("int64")).Return(nil, "", errors.New("Unexpexted Error")).Once()
 
-		mockAuthorrepo := new(_authorMock.Repository)
-		u := ucase.NewOrderUsecase(mockOrderRepo, mockAuthorrepo, time.Second*2)
+		u := ucase.NewOrderUsecase(mockOrderRepo, time.Second*2)
 		num := int64(1)
 		cursor := "12"
 		list, nextCursor, err := u.Fetch(context.TODO(), cursor, num)
@@ -80,9 +76,8 @@ func TestGetByID(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		mockOrderRepo.On("GetByID", mock.Anything, mock.AnythingOfType("int64")).Return(&mockOrder, nil).Once()
-		mockAuthorrepo := new(_authorMock.Repository)
 		mockAuthorrepo.On("GetByID", mock.Anything, mock.AnythingOfType("int64")).Return(mockAuthor, nil)
-		u := ucase.NewOrderUsecase(mockOrderRepo, mockAuthorrepo, time.Second*2)
+		u := ucase.NewOrderUsecase(mockOrderRepo, time.Second*2)
 
 		a, err := u.GetByID(context.TODO(), mockOrder.ID)
 
@@ -95,8 +90,7 @@ func TestGetByID(t *testing.T) {
 	t.Run("error-failed", func(t *testing.T) {
 		mockOrderRepo.On("GetByID", mock.Anything, mock.AnythingOfType("int64")).Return(nil, errors.New("Unexpected")).Once()
 
-		mockAuthorrepo := new(_authorMock.Repository)
-		u := ucase.NewOrderUsecase(mockOrderRepo, mockAuthorrepo, time.Second*2)
+		u := ucase.NewOrderUsecase(mockOrderRepo, time.Second*2)
 
 		a, err := u.GetByID(context.TODO(), mockOrder.ID)
 
@@ -122,8 +116,7 @@ func TestStore(t *testing.T) {
 		mockOrderRepo.On("GetByTitle", mock.Anything, mock.AnythingOfType("string")).Return(nil, models.ErrNotFound).Once()
 		mockOrderRepo.On("Store", mock.Anything, mock.AnythingOfType("*models.Order")).Return(nil).Once()
 
-		mockAuthorrepo := new(_authorMock.Repository)
-		u := ucase.NewOrderUsecase(mockOrderRepo, mockAuthorrepo, time.Second*2)
+		u := ucase.NewOrderUsecase(mockOrderRepo, time.Second*2)
 
 		err := u.Store(context.TODO(), &tempMockOrder)
 
@@ -138,10 +131,7 @@ func TestStore(t *testing.T) {
 			ID:   1,
 			Name: "Iman Tumorang",
 		}
-		mockAuthorrepo := new(_authorMock.Repository)
-		mockAuthorrepo.On("GetByID", mock.Anything, mock.AnythingOfType("int64")).Return(mockAuthor, nil)
-
-		u := ucase.NewOrderUsecase(mockOrderRepo, mockAuthorrepo, time.Second*2)
+		u := ucase.NewOrderUsecase(mockOrderRepo, time.Second*2)
 
 		err := u.Store(context.TODO(), &mockOrder)
 
@@ -164,8 +154,7 @@ func TestDelete(t *testing.T) {
 
 		mockOrderRepo.On("Delete", mock.Anything, mock.AnythingOfType("int64")).Return(nil).Once()
 
-		mockAuthorrepo := new(_authorMock.Repository)
-		u := ucase.NewOrderUsecase(mockOrderRepo, mockAuthorrepo, time.Second*2)
+		u := ucase.NewOrderUsecase(mockOrderRepo, time.Second*2)
 
 		err := u.Delete(context.TODO(), mockOrder.ID)
 
@@ -176,8 +165,7 @@ func TestDelete(t *testing.T) {
 	t.Run("order-is-not-exist", func(t *testing.T) {
 		mockOrderRepo.On("GetByID", mock.Anything, mock.AnythingOfType("int64")).Return(nil, nil).Once()
 
-		mockAuthorrepo := new(_authorMock.Repository)
-		u := ucase.NewOrderUsecase(mockOrderRepo, mockAuthorrepo, time.Second*2)
+		u := ucase.NewOrderUsecase(mockOrderRepo, time.Second*2)
 
 		err := u.Delete(context.TODO(), mockOrder.ID)
 
@@ -188,7 +176,6 @@ func TestDelete(t *testing.T) {
 	t.Run("error-happens-in-db", func(t *testing.T) {
 		mockOrderRepo.On("GetByID", mock.Anything, mock.AnythingOfType("int64")).Return(nil, errors.New("Unexpected Error")).Once()
 
-		mockAuthorrepo := new(_authorMock.Repository)
 		u := ucase.NewOrderUsecase(mockOrderRepo, mockAuthorrepo, time.Second*2)
 
 		err := u.Delete(context.TODO(), mockOrder.ID)
@@ -211,8 +198,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockOrderRepo.On("Update", mock.Anything, &mockOrder).Once().Return(nil)
 
-		mockAuthorrepo := new(_authorMock.Repository)
-		u := ucase.NewOrderUsecase(mockOrderRepo, mockAuthorrepo, time.Second*2)
+		u := ucase.NewOrderUsecase(mockOrderRepo, time.Second*2)
 
 		err := u.Update(context.TODO(), &mockOrder)
 		assert.NoError(t, err)

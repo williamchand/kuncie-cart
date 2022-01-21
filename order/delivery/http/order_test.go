@@ -15,9 +15,9 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	orderHttp "github.com/williamchandra/kuncie-cart/order/delivery/http"
-	"github.com/williamchandra/kuncie-cart/order/mocks"
-	"github.com/williamchandra/kuncie-cart/models"
+	"github.com/williamchand/kuncie-cart/models"
+	orderHttp "github.com/williamchand/kuncie-cart/order/delivery/http"
+	"github.com/williamchand/kuncie-cart/order/mocks"
 )
 
 func TestFetch(t *testing.T) {

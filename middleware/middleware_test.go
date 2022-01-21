@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/williamchandra/kuncie-cart/middleware"
+	"github.com/williamchand/kuncie-cart/middleware"
 )
 
 func TestCORS(t *testing.T) {

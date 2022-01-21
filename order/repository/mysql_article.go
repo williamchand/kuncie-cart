@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/williamchand/kuncie-cart/order"
 
-	"github.com/williamchandra/kuncie-cart/models"
+	"github.com/williamchand/kuncie-cart/models"
 )
 
 const (
@@ -43,12 +43,10 @@ func (m *mysqlOrderRepository) fetch(ctx context.Context, query string, args ...
 	result := make([]*models.Order, 0)
 	for rows.Next() {
 		t := new(models.Order)
-		authorID := int64(0)
 		err = rows.Scan(
 			&t.ID,
 			&t.Title,
 			&t.Content,
-			&authorID,
 			&t.UpdatedAt,
 			&t.CreatedAt,
 		)
@@ -56,9 +54,6 @@ func (m *mysqlOrderRepository) fetch(ctx context.Context, query string, args ...
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
-		}
-		t.Author = models.Author{
-			ID: authorID,
 		}
 		result = append(result, t)
 	}
@@ -129,7 +124,7 @@ func (m *mysqlOrderRepository) Store(ctx context.Context, a *models.Order) error
 		return err
 	}
 
-	res, err := stmt.ExecContext(ctx, a.Title, a.Content, a.Author.ID, a.UpdatedAt, a.CreatedAt)
+	res, err := stmt.ExecContext(ctx, a.Title, a.Content, a.UpdatedAt, a.CreatedAt)
 	if err != nil {
 		return err
 	}
@@ -177,7 +172,7 @@ func (m *mysqlOrderRepository) Update(ctx context.Context, ar *models.Order) err
 		return nil
 	}
 
-	res, err := stmt.ExecContext(ctx, ar.Title, ar.Content, ar.Author.ID, ar.UpdatedAt, ar.ID)
+	res, err := stmt.ExecContext(ctx, ar.Title, ar.Content, ar.UpdatedAt, ar.ID)
 	if err != nil {
 		return err
 	}

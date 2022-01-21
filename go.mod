@@ -1,11 +1,10 @@
-module github.com/williamchandra/kuncie-cart
+module github.com/williamchand/kuncie-cart
 
 go 1.12
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/bxcodec/faker v1.4.2
-	github.com/williamchand/kuncie-cart v2.0.1+incompatible
 	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect

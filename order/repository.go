@@ -3,7 +3,7 @@ package order
 import (
 	"context"
 
-	"github.com/williamchandra/kuncie-cart/models"
+	"github.com/williamchand/kuncie-cart/models"
 )
 
 // Repository represent the order's repository contract

@@ -3,11 +3,12 @@ package graphql
 import (
 	"context"
 	"fmt"
-	"github.com/graphql-go/graphql"
-	"github.com/williamchandra/kuncie-cart/order"
-	"github.com/williamchandra/kuncie-cart/order/repository"
-	"github.com/williamchandra/kuncie-cart/models"
 	"time"
+
+	"github.com/graphql-go/graphql"
+	"github.com/williamchand/kuncie-cart/models"
+	"github.com/williamchand/kuncie-cart/order"
+	"github.com/williamchand/kuncie-cart/order/repository"
 )
 
 // OrderEdge holds information of order edge.
@@ -63,7 +64,7 @@ func (r resolver) FetchOrder(params graphql.ResolveParams) (interface{}, error) 
 	for index, result := range results {
 		if result != nil {
 			edges[index] = OrderEdge{
-				Node: *result,
+				Node:   *result,
 				Cursor: repository.EncodeCursor(result.CreatedAt),
 			}
 		}
@@ -83,9 +84,9 @@ func (r resolver) FetchOrder(params graphql.ResolveParams) (interface{}, error) 
 
 	return OrderResult{
 		Edges: edges,
-		PageInfo:PageInfo{
-			EndCursor: cursorFromService,
-			HasNextPage:isHasNextPage,
+		PageInfo: PageInfo{
+			EndCursor:   cursorFromService,
+			HasNextPage: isHasNextPage,
 		},
 	}, nil
 }
@@ -111,7 +112,7 @@ func (r resolver) GetOrderByID(params graphql.ResolveParams) (interface{}, error
 func (r resolver) GetOrderByTitle(params graphql.ResolveParams) (interface{}, error) {
 	var (
 		title string
-		ok bool
+		ok    bool
 	)
 
 	ctx := context.Background()
@@ -130,9 +131,9 @@ func (r resolver) GetOrderByTitle(params graphql.ResolveParams) (interface{}, er
 
 func (r resolver) UpdateOrder(params graphql.ResolveParams) (interface{}, error) {
 	var (
-		id int
+		id             int
 		title, content string
-		ok bool
+		ok             bool
 	)
 
 	ctx := context.Background()
@@ -149,9 +150,9 @@ func (r resolver) UpdateOrder(params graphql.ResolveParams) (interface{}, error)
 	}
 
 	updatedOrder := &models.Order{
-		ID: int64(id),
-		Title: title,
-		Content: content,
+		ID:        int64(id),
+		Title:     title,
+		Content:   content,
 		UpdatedAt: time.Now(),
 	}
 
@@ -165,7 +166,7 @@ func (r resolver) UpdateOrder(params graphql.ResolveParams) (interface{}, error)
 func (r resolver) StoreOrder(params graphql.ResolveParams) (interface{}, error) {
 	var (
 		title, content string
-		ok bool
+		ok             bool
 	)
 
 	ctx := context.Background()
@@ -180,7 +181,7 @@ func (r resolver) StoreOrder(params graphql.ResolveParams) (interface{}, error) 
 
 	storedOrder := &models.Order{
 		Content: content,
-		Title:title,
+		Title:   title,
 	}
 
 	if err := r.orderService.Store(ctx, storedOrder); err != nil {
@@ -210,6 +211,6 @@ func (r resolver) DeleteOrder(params graphql.ResolveParams) (interface{}, error)
 
 func NewResolver(orderService order.Usecase) Resolver {
 	return &resolver{
-		orderService:orderService,
+		orderService: orderService,
 	}
 }

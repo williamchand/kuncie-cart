@@ -9,8 +9,8 @@ import (
 	"github.com/sirupsen/logrus"
 	validator "gopkg.in/go-playground/validator.v9"
 
-	"github.com/williamchandra/kuncie-cart/order"
-	"github.com/williamchandra/kuncie-cart/models"
+	"github.com/williamchand/kuncie-cart/models"
+	"github.com/williamchand/kuncie-cart/order"
 )
 
 // ResponseError represent the reseponse error struct

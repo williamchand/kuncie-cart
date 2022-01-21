@@ -23,7 +23,7 @@ Here is the steps to run it with `docker-compose`
 $ cd workspace
 
 # Clone into YOUR $GOPATH/src
-$ git clone https://github.com/williamchandra/kuncie-cart.git
+$ git clone https://github.com/williamchand/kuncie-cart.git
 
 #move to project
 $ cd kuncie-cart

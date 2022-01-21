@@ -5,20 +5,17 @@ import (
 	"time"
 
 	"github.com/williamchand/kuncie-cart/order"
-	"golang.org/x/sync/errgroup"
 
-	"github.com/williamchandra/kuncie-cart/author"
-	"github.com/williamchandra/kuncie-cart/models"
+	"github.com/williamchand/kuncie-cart/models"
 )
 
 type orderUsecase struct {
 	orderRepo      order.Repository
-	authorRepo     author.Repository
 	contextTimeout time.Duration
 }
 
 // NewOrderUsecase will create new an orderUsecase object representation of order.Usecase interface
-func NewOrderUsecase(a order.Repository, ar author.Repository, timeout time.Duration) order.Usecase {
+func NewOrderUsecase(a order.Repository, timeout time.Duration) order.Usecase {
 	return &orderUsecase{
 		orderRepo:      a,
 		contextTimeout: timeout,
@@ -30,17 +27,6 @@ func NewOrderUsecase(a order.Repository, ar author.Repository, timeout time.Dura
 * Look how this works in this package explanation
 * in godoc: https://godoc.org/golang.org/x/sync/errgroup#ex-Group--Pipeline
  */
-func (a *orderUsecase) fillAuthorDetails(c context.Context, data []*models.Order) ([]*models.Order, error) {
-
-	g, _ := errgroup.WithContext(c)
-
-	if err := g.Wait(); err != nil {
-		return nil, err
-	}
-
-	return data, nil
-}
-
 func (a *orderUsecase) Fetch(c context.Context, cursor string, num int64) ([]*models.Order, string, error) {
 	if num == 0 {
 		num = 10
@@ -50,11 +36,6 @@ func (a *orderUsecase) Fetch(c context.Context, cursor string, num int64) ([]*mo
 	defer cancel()
 
 	listOrder, nextCursor, err := a.orderRepo.Fetch(ctx, cursor, num)
-	if err != nil {
-		return nil, "", err
-	}
-
-	listOrder, err = a.fillAuthorDetails(ctx, listOrder)
 	if err != nil {
 		return nil, "", err
 	}
@@ -72,11 +53,6 @@ func (a *orderUsecase) GetByID(c context.Context, id int64) (*models.Order, erro
 		return nil, err
 	}
 
-	resAuthor, err := a.authorRepo.GetByID(ctx, res.Author.ID)
-	if err != nil {
-		return nil, err
-	}
-	res.Author = *resAuthor
 	return res, nil
 }
 
@@ -97,12 +73,6 @@ func (a *orderUsecase) GetByTitle(c context.Context, title string) (*models.Orde
 	if err != nil {
 		return nil, err
 	}
-
-	resAuthor, err := a.authorRepo.GetByID(ctx, res.Author.ID)
-	if err != nil {
-		return nil, err
-	}
-	res.Author = *resAuthor
 
 	return res, nil
 }

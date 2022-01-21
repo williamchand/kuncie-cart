@@ -19,7 +19,7 @@ import (
 	_graphQLOrderDelivery "github.com/williamchandra/kuncie-cart/order/delivery/graphql"
 	_orderRepo "github.com/williamchandra/kuncie-cart/order/repository"
 	_orderUcase "github.com/williamchandra/kuncie-cart/order/usecase"
-	"github.com/williamchandra/kuncie-cart/middleware"
+	"github.com/williamchand/kuncie-cart/middleware"
 )
 
 func init() {

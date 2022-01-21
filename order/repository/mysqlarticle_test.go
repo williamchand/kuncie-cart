@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	"github.com/williamchandra/kuncie-cart/models"
-	orderRepo "github.com/williamchandra/kuncie-cart/order/repository"
+	"github.com/williamchand/kuncie-cart/models"
+	orderRepo "github.com/williamchand/kuncie-cart/order/repository"
 )
 
 func TestFetch(t *testing.T) {
