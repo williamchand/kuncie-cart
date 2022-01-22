@@ -78,42 +78,8 @@ type Schema struct {
 // Query initializes config schema query for graphql server.
 func (s Schema) Query() *graphql.Object {
 	objectConfig := graphql.ObjectConfig{
-		Name: "Query",
-		Fields: graphql.Fields{
-			"FetchOrder": &graphql.Field{
-				Type:        OrderResultGraphQL,
-				Description: "Fetch Order",
-				Args: graphql.FieldConfigArgument{
-					"first": &graphql.ArgumentConfig{
-						Type: graphql.Int,
-					},
-					"after": &graphql.ArgumentConfig{
-						Type: graphql.String,
-					},
-				},
-				Resolve: s.orderResolver.FetchOrder,
-			},
-			"GetOrderByID": &graphql.Field{
-				Type:        OrderGraphQL,
-				Description: "Get Order By ID",
-				Args: graphql.FieldConfigArgument{
-					"id": &graphql.ArgumentConfig{
-						Type: graphql.Int,
-					},
-				},
-				Resolve: s.orderResolver.GetOrderByID,
-			},
-			"GetOrderByTitle": &graphql.Field{
-				Type:        OrderGraphQL,
-				Description: "Get Order By Title",
-				Args: graphql.FieldConfigArgument{
-					"title": &graphql.ArgumentConfig{
-						Type: graphql.String,
-					},
-				},
-				Resolve: s.orderResolver.GetOrderByTitle,
-			},
-		},
+		Name:   "Query",
+		Fields: graphql.Fields{},
 	}
 
 	return graphql.NewObject(objectConfig)
@@ -124,44 +90,24 @@ func (s Schema) Mutation() *graphql.Object {
 	objectConfig := graphql.ObjectConfig{
 		Name: "Mutation",
 		Fields: graphql.Fields{
-			"UpdateOrder": &graphql.Field{
+			"ConfirmOrder": &graphql.Field{
 				Type:        graphql.String,
-				Description: "Update order by certain ID",
-				Args: graphql.FieldConfigArgument{
-					"id": &graphql.ArgumentConfig{
-						Type: graphql.Int,
-					},
-					"title": &graphql.ArgumentConfig{
-						Type: graphql.String,
-					},
-					"content": &graphql.ArgumentConfig{
-						Type: graphql.String,
-					},
-				},
-				Resolve: s.orderResolver.UpdateOrder,
+				Description: "Confirm all order at the cart",
+				Args:        graphql.FieldConfigArgument{},
+				Resolve:     s.orderResolver.ConfirmOrder,
 			},
-			"StoreOrder": &graphql.Field{
+			"AddCart": &graphql.Field{
 				Type:        graphql.String,
 				Description: "Store a new order",
 				Args: graphql.FieldConfigArgument{
-					"title": &graphql.ArgumentConfig{
+					"sku": &graphql.ArgumentConfig{
 						Type: graphql.String,
 					},
-					"content": &graphql.ArgumentConfig{
-						Type: graphql.String,
-					},
-				},
-				Resolve: s.orderResolver.StoreOrder,
-			},
-			"DeleteOrder": &graphql.Field{
-				Type:        graphql.String,
-				Description: "Delete an order by its ID",
-				Args: graphql.FieldConfigArgument{
-					"id": &graphql.ArgumentConfig{
+					"quantity": &graphql.ArgumentConfig{
 						Type: graphql.Int,
 					},
 				},
-				Resolve: s.orderResolver.DeleteOrder,
+				Resolve: s.orderResolver.AddCart,
 			},
 		},
 	}
