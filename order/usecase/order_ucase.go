@@ -22,33 +22,11 @@ func NewOrderUsecase(a order.Repository, timeout time.Duration) order.Usecase {
 	}
 }
 
-/*
-* In this function below, I'm using errgroup with the pipeline pattern
-* Look how this works in this package explanation
-* in godoc: https://godoc.org/golang.org/x/sync/errgroup#ex-Group--Pipeline
- */
-func (a *orderUsecase) Fetch(c context.Context, cursor string, num int64) ([]*models.Order, string, error) {
-	if num == 0 {
-		num = 10
-	}
+func (a *orderUsecase) GetItems(c context.Context, sku []string) (result []*models.Items, err error) {
 
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
 	defer cancel()
-
-	listOrder, nextCursor, err := a.orderRepo.Fetch(ctx, cursor, num)
-	if err != nil {
-		return nil, "", err
-	}
-
-	return listOrder, nextCursor, nil
-}
-
-func (a *orderUsecase) GetByID(c context.Context, id int64) (*models.Order, error) {
-
-	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
-	defer cancel()
-
-	res, err := a.orderRepo.GetByID(ctx, id)
+	res, err := a.orderRepo.GetItems(ctx, sku)
 	if err != nil {
 		return nil, err
 	}
@@ -56,20 +34,11 @@ func (a *orderUsecase) GetByID(c context.Context, id int64) (*models.Order, erro
 	return res, nil
 }
 
-func (a *orderUsecase) Update(c context.Context, ar *models.Order) error {
+func (a *orderUsecase) GetCart(c context.Context, id int64) (result []*models.Cart, err error) {
 
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
 	defer cancel()
-
-	ar.UpdatedAt = time.Now()
-	return a.orderRepo.Update(ctx, ar)
-}
-
-func (a *orderUsecase) GetByTitle(c context.Context, title string) (*models.Order, error) {
-
-	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
-	defer cancel()
-	res, err := a.orderRepo.GetByTitle(ctx, title)
+	res, err := a.orderRepo.GetCart(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -77,31 +46,62 @@ func (a *orderUsecase) GetByTitle(c context.Context, title string) (*models.Orde
 	return res, nil
 }
 
-func (a *orderUsecase) Store(c context.Context, m *models.Order) error {
+func (a *orderUsecase) GetPromotions(c context.Context, id int64) (*models.Promotions, error) {
 
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
 	defer cancel()
-	existedOrder, _ := a.GetByTitle(ctx, m.Title)
-	if existedOrder != nil {
-		return models.ErrConflict
+	res, err := a.orderRepo.GetPromotions(ctx, id)
+	if err != nil {
+		return nil, err
 	}
 
-	err := a.orderRepo.Store(ctx, m)
+	return res, nil
+}
+
+func (a *orderUsecase) CreateCart(c context.Context, m *models.Cart) error {
+	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+	defer cancel()
+
+	err := a.orderRepo.CreateCart(ctx, m)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (a *orderUsecase) Delete(c context.Context, id int64) error {
+func (a *orderUsecase) CreateOrder(c context.Context, m *models.Order) error {
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
 	defer cancel()
-	existedOrder, err := a.orderRepo.GetByID(ctx, id)
+
+	err := a.orderRepo.CreateOrder(ctx, m)
 	if err != nil {
 		return err
 	}
-	if existedOrder == nil {
-		return models.ErrNotFound
+	return nil
+}
+
+func (a *orderUsecase) CreateOrderDetails(c context.Context, m *models.OrderDetails) error {
+	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+	defer cancel()
+
+	err := a.orderRepo.CreateOrderDetails(ctx, m)
+	if err != nil {
+		return err
 	}
-	return a.orderRepo.Delete(ctx, id)
+	return nil
+}
+
+func (a *orderUsecase) UpdateCart(c context.Context, ar *models.Cart) error {
+
+	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+	defer cancel()
+
+	ar.UpdatedAt = time.Now()
+	return a.orderRepo.UpdateCart(ctx, ar)
+}
+
+func (a *orderUsecase) DeleteCart(c context.Context) error {
+	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+	defer cancel()
+	return a.orderRepo.DeleteCart(ctx)
 }

@@ -5,8 +5,10 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/williamchand/kuncie-cart/order"
 
 	"github.com/williamchand/kuncie-cart/models"
@@ -25,105 +27,123 @@ func NewMysqlOrderRepository(Conn *sql.DB) order.Repository {
 	return &mysqlOrderRepository{Conn}
 }
 
-// func (m *mysqlOrderRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.Order, error) {
-// 	rows, err := m.Conn.QueryContext(ctx, query, args...)
-// 	if err != nil {
-// 		logrus.Error(err)
-// 		return nil, err
-// 	}
+func (m *mysqlOrderRepository) GetItems(ctx context.Context, sku []string) (res []*models.Items, err error) {
+	args := make([]interface{}, len(sku))
+	for i, skuid := range sku {
+		args[i] = skuid
+	}
+	query := `SELECT id,sku,name,price,inventory_quantity, updated_at, created_at
+  						FROM items WHERE sku IN (?` + strings.Repeat(",?", len(args)-1) + `)`
+	rows, err := m.Conn.QueryContext(ctx, query, args...)
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
 
-// 	defer func() {
-// 		err := rows.Close()
-// 		if err != nil {
-// 			logrus.Error(err)
-// 		}
-// 	}()
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}()
 
-// 	result := make([]*models.Order, 0)
-// 	for rows.Next() {
-// 		t := new(models.Order)
-// 		err = rows.Scan(
-// 			&t.ID,
-// 			&t.Title,
-// 			&t.Content,
-// 			&t.UpdatedAt,
-// 			&t.CreatedAt,
-// 		)
+	result := make([]*models.Items, 0)
+	for rows.Next() {
+		t := new(models.Items)
+		err = rows.Scan(
+			&t.ID,
+			&t.SKU,
+			&t.Name,
+			&t.Price,
+			&t.InventoryQuantity,
+			&t.UpdatedAt,
+			&t.CreatedAt,
+		)
 
-// 		if err != nil {
-// 			logrus.Error(err)
-// 			return nil, err
-// 		}
-// 		result = append(result, t)
-// 	}
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+		result = append(result, t)
+	}
 
-// 	return result, nil
-// }
+	return result, nil
+}
 
-// func (m *mysqlOrderRepository) Fetch(ctx context.Context, cursor string, num int64) ([]*models.Order, string, error) {
-// 	query := `SELECT id,title,content, author_id, updated_at, created_at
-//   						FROM order WHERE created_at > ? ORDER BY created_at LIMIT ? `
+func (m *mysqlOrderRepository) GetPromotions(ctx context.Context, id int64) (res *models.Promotions, err error) {
+	query := `SELECT id,items_id,promo_type,promo,quantity_requirement
+  						FROM promotions WHERE items_id = ?`
+	rows, err := m.Conn.QueryContext(ctx, query, id)
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
 
-// 	decodedCursor, err := DecodeCursor(cursor)
-// 	if err != nil && cursor != "" {
-// 		return nil, "", models.ErrBadParamInput
-// 	}
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}()
 
-// 	res, err := m.fetch(ctx, query, decodedCursor, num)
-// 	if err != nil {
-// 		return nil, "", err
-// 	}
+	rows.Next()
+	err = rows.Scan(
+		&res.ID,
+		&res.ItemsID,
+		&res.PromoType,
+		&res.Promo,
+		&res.QuantityRequirement,
+	)
 
-// 	nextCursor := ""
-// 	if len(res) == int(num) {
-// 		nextCursor = EncodeCursor(res[len(res)-1].CreatedAt)
-// 	}
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
 
-// 	return res, nextCursor, err
-// }
-// func (m *mysqlOrderRepository) GetByID(ctx context.Context, id int64) (res *models.Order, err error) {
-// 	query := `SELECT id,title,content, author_id, updated_at, created_at
-//   						FROM order WHERE ID = ?`
+	return res, nil
+}
 
-// 	list, err := m.fetch(ctx, query, id)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (m *mysqlOrderRepository) GetCart(ctx context.Context, id int64) (res []*models.Cart, err error) {
+	query := `SELECT id, items_id, quantity, updated_at, created_at
+  						FROM cart WHERE items_id = ?`
+	rows, err := m.Conn.QueryContext(ctx, query, id)
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
 
-// 	if len(list) > 0 {
-// 		res = list[0]
-// 	} else {
-// 		return nil, models.ErrNotFound
-// 	}
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}()
 
-// 	return
-// }
+	rows.Next()
+	err = rows.Scan(
+		&res.ID,
+		&res.ItemsID,
+		&res.Quantity,
+		&res.UpdatedAt,
+		&res.CreatedAt,
+	)
 
-// func (m *mysqlOrderRepository) GetByTitle(ctx context.Context, title string) (res *models.Order, err error) {
-// 	query := `SELECT id,title,content, author_id, updated_at, created_at
-//   						FROM order WHERE title = ?`
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
 
-// 	list, err := m.fetch(ctx, query, title)
-// 	if err != nil {
-// 		return
-// 	}
+	return res, nil
+}
 
-// 	if len(list) > 0 {
-// 		res = list[0]
-// 	} else {
-// 		return nil, models.ErrNotFound
-// 	}
-// 	return
-// }
-
-func (m *mysqlOrderRepository) Store(ctx context.Context, a *models.Order) error {
-	query := `INSERT  order SET title=? , content=? , author_id=?, updated_at=? , created_at=?`
+func (m *mysqlOrderRepository) CreateCart(ctx context.Context, a *models.Cart) error {
+	query := `INSERT cart SET items_id=?, quantity=?, updated_at=?, created_at=?`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
 	}
 
-	res, err := stmt.ExecContext(ctx, a.Title, a.Content, a.UpdatedAt, a.CreatedAt)
+	res, err := stmt.ExecContext(ctx, a.ItemsID, a.Quantity, a.UpdatedAt, a.CreatedAt)
 	if err != nil {
 		return err
 	}
@@ -137,15 +157,81 @@ func (m *mysqlOrderRepository) Store(ctx context.Context, a *models.Order) error
 	return nil
 }
 
-func (m *mysqlOrderRepository) Delete(ctx context.Context, id int64) error {
-	query := "DELETE FROM order WHERE id = ?"
+func (m *mysqlOrderRepository) CreateOrder(ctx context.Context, a *models.Order) error {
+	query := `INSERT order SET total_price=? , updated_at=? , created_at=?`
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	res, err := stmt.ExecContext(ctx, a.TotalPrice, a.UpdatedAt, a.CreatedAt)
+	if err != nil {
+		return err
+	}
+
+	lastID, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	a.ID = lastID
+	return nil
+}
+
+func (m *mysqlOrderRepository) CreateOrderDetails(ctx context.Context, a *models.OrderDetails) error {
+	query := `INSERT order_details SET order_id=? , sku=?, name=?, price=?, quantity=?, promo_type=?, updated_at=? , created_at=?`
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	res, err := stmt.ExecContext(ctx, a.OrderID, a.SKU, a.Name, a.Price, a.Quantity, a.PromoType, a.UpdatedAt, a.CreatedAt)
+	if err != nil {
+		return err
+	}
+
+	lastID, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	a.ID = lastID
+	return nil
+}
+func (m *mysqlOrderRepository) UpdateCart(ctx context.Context, ar *models.Order) error {
+	query := `UPDATE cart set items_id=?, quantity=?, updated_at=?, created_at=? WHERE id = ?`
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return nil
+	}
+
+	res, err := stmt.ExecContext(ctx, ar.ItemsID, ar.Quantity, ar.UpdatedAt, ar.CreatedAt, ar.ID)
+	if err != nil {
+		return err
+	}
+	affect, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affect != 1 {
+		err = fmt.Errorf("Weird  Behaviour. Total Affected: %d", affect)
+
+		return err
+	}
+
+	return nil
+}
+
+func (m *mysqlOrderRepository) DeleteCart(ctx context.Context) error {
+	query := "DELETE FROM cart"
 
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
 	}
 
-	res, err := stmt.ExecContext(ctx, id)
+	res, err := stmt.ExecContext(ctx)
 	if err != nil {
 
 		return err
@@ -158,30 +244,6 @@ func (m *mysqlOrderRepository) Delete(ctx context.Context, id int64) error {
 
 	if rowsAfected != 1 {
 		err = fmt.Errorf("Weird  Behaviour. Total Affected: %d", rowsAfected)
-		return err
-	}
-
-	return nil
-}
-func (m *mysqlOrderRepository) Update(ctx context.Context, ar *models.Order) error {
-	query := `UPDATE order set title=?, content=?, author_id=?, updated_at=? WHERE ID = ?`
-
-	stmt, err := m.Conn.PrepareContext(ctx, query)
-	if err != nil {
-		return nil
-	}
-
-	res, err := stmt.ExecContext(ctx, ar.Title, ar.Content, ar.UpdatedAt, ar.ID)
-	if err != nil {
-		return err
-	}
-	affect, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if affect != 1 {
-		err = fmt.Errorf("Weird  Behaviour. Total Affected: %d", affect)
-
 		return err
 	}
 
