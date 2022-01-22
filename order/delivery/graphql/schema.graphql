@@ -25,13 +25,9 @@ type OrdersResult {
 }
 
 type Query {
-    FetchOrder(after: String, first: Int): OrdersResult
-    GetOrderByID(id: Int): Order
-    GetOrderByTitle(title: String): Order
 }
 
 type Mutation {
-    UpdateOrder(id: Int, title: String, content: String): Order
-    StoreOrder(title: String, content: String): Order
-    DeleteOrder(id: Int): Int
+    AddCart(sku: String, quantity: Int): Order
+    ConfirmOrder(): Order
 }
