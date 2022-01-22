@@ -3,23 +3,23 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/graphql-go/graphql"
-	"github.com/sirupsen/logrus"
 	"log"
 	"net/url"
 	"os"
 	"time"
 
+	"github.com/graphql-go/graphql"
+	"github.com/sirupsen/logrus"
+
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/graphql-go/handler"
 	"github.com/labstack/echo"
 	"github.com/spf13/viper"
-	"github.com/graphql-go/handler"
 
-	_orderHttpDeliver "github.com/williamchand/kuncie-cart/order/delivery/http"
+	"github.com/williamchand/kuncie-cart/middleware"
 	_graphQLOrderDelivery "github.com/williamchand/kuncie-cart/order/delivery/graphql"
 	_orderRepo "github.com/williamchand/kuncie-cart/order/repository"
 	_orderUcase "github.com/williamchand/kuncie-cart/order/usecase"
-	"github.com/williamchand/kuncie-cart/middleware"
 )
 
 func init() {
@@ -69,7 +69,6 @@ func main() {
 
 	timeoutContext := time.Duration(viper.GetInt("context.timeout")) * time.Second
 	ou := _orderUcase.NewOrderUsecase(or, timeoutContext)
-	_orderHttpDeliver.NewOrderHandler(e, ou)
 
 	schema := _graphQLOrderDelivery.NewSchema(_graphQLOrderDelivery.NewResolver(ou))
 	graphqlSchema, err := graphql.NewSchema(graphql.SchemaConfig{
@@ -81,9 +80,9 @@ func main() {
 	}
 
 	graphQLHandler := handler.New(&handler.Config{
-		Schema: &graphqlSchema,
-		GraphiQL:true,
-		Pretty:true,
+		Schema:   &graphqlSchema,
+		GraphiQL: true,
+		Pretty:   true,
 	})
 
 	e.GET("/graphql", echo.WrapHandler(graphQLHandler))

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/williamchand/kuncie-cart/order"
 
 	"github.com/williamchand/kuncie-cart/models"
@@ -26,96 +25,96 @@ func NewMysqlOrderRepository(Conn *sql.DB) order.Repository {
 	return &mysqlOrderRepository{Conn}
 }
 
-func (m *mysqlOrderRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.Order, error) {
-	rows, err := m.Conn.QueryContext(ctx, query, args...)
-	if err != nil {
-		logrus.Error(err)
-		return nil, err
-	}
+// func (m *mysqlOrderRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.Order, error) {
+// 	rows, err := m.Conn.QueryContext(ctx, query, args...)
+// 	if err != nil {
+// 		logrus.Error(err)
+// 		return nil, err
+// 	}
 
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logrus.Error(err)
-		}
-	}()
+// 	defer func() {
+// 		err := rows.Close()
+// 		if err != nil {
+// 			logrus.Error(err)
+// 		}
+// 	}()
 
-	result := make([]*models.Order, 0)
-	for rows.Next() {
-		t := new(models.Order)
-		err = rows.Scan(
-			&t.ID,
-			&t.Title,
-			&t.Content,
-			&t.UpdatedAt,
-			&t.CreatedAt,
-		)
+// 	result := make([]*models.Order, 0)
+// 	for rows.Next() {
+// 		t := new(models.Order)
+// 		err = rows.Scan(
+// 			&t.ID,
+// 			&t.Title,
+// 			&t.Content,
+// 			&t.UpdatedAt,
+// 			&t.CreatedAt,
+// 		)
 
-		if err != nil {
-			logrus.Error(err)
-			return nil, err
-		}
-		result = append(result, t)
-	}
+// 		if err != nil {
+// 			logrus.Error(err)
+// 			return nil, err
+// 		}
+// 		result = append(result, t)
+// 	}
 
-	return result, nil
-}
+// 	return result, nil
+// }
 
-func (m *mysqlOrderRepository) Fetch(ctx context.Context, cursor string, num int64) ([]*models.Order, string, error) {
-	query := `SELECT id,title,content, author_id, updated_at, created_at
-  						FROM order WHERE created_at > ? ORDER BY created_at LIMIT ? `
+// func (m *mysqlOrderRepository) Fetch(ctx context.Context, cursor string, num int64) ([]*models.Order, string, error) {
+// 	query := `SELECT id,title,content, author_id, updated_at, created_at
+//   						FROM order WHERE created_at > ? ORDER BY created_at LIMIT ? `
 
-	decodedCursor, err := DecodeCursor(cursor)
-	if err != nil && cursor != "" {
-		return nil, "", models.ErrBadParamInput
-	}
+// 	decodedCursor, err := DecodeCursor(cursor)
+// 	if err != nil && cursor != "" {
+// 		return nil, "", models.ErrBadParamInput
+// 	}
 
-	res, err := m.fetch(ctx, query, decodedCursor, num)
-	if err != nil {
-		return nil, "", err
-	}
+// 	res, err := m.fetch(ctx, query, decodedCursor, num)
+// 	if err != nil {
+// 		return nil, "", err
+// 	}
 
-	nextCursor := ""
-	if len(res) == int(num) {
-		nextCursor = EncodeCursor(res[len(res)-1].CreatedAt)
-	}
+// 	nextCursor := ""
+// 	if len(res) == int(num) {
+// 		nextCursor = EncodeCursor(res[len(res)-1].CreatedAt)
+// 	}
 
-	return res, nextCursor, err
-}
-func (m *mysqlOrderRepository) GetByID(ctx context.Context, id int64) (res *models.Order, err error) {
-	query := `SELECT id,title,content, author_id, updated_at, created_at
-  						FROM order WHERE ID = ?`
+// 	return res, nextCursor, err
+// }
+// func (m *mysqlOrderRepository) GetByID(ctx context.Context, id int64) (res *models.Order, err error) {
+// 	query := `SELECT id,title,content, author_id, updated_at, created_at
+//   						FROM order WHERE ID = ?`
 
-	list, err := m.fetch(ctx, query, id)
-	if err != nil {
-		return nil, err
-	}
+// 	list, err := m.fetch(ctx, query, id)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	if len(list) > 0 {
-		res = list[0]
-	} else {
-		return nil, models.ErrNotFound
-	}
+// 	if len(list) > 0 {
+// 		res = list[0]
+// 	} else {
+// 		return nil, models.ErrNotFound
+// 	}
 
-	return
-}
+// 	return
+// }
 
-func (m *mysqlOrderRepository) GetByTitle(ctx context.Context, title string) (res *models.Order, err error) {
-	query := `SELECT id,title,content, author_id, updated_at, created_at
-  						FROM order WHERE title = ?`
+// func (m *mysqlOrderRepository) GetByTitle(ctx context.Context, title string) (res *models.Order, err error) {
+// 	query := `SELECT id,title,content, author_id, updated_at, created_at
+//   						FROM order WHERE title = ?`
 
-	list, err := m.fetch(ctx, query, title)
-	if err != nil {
-		return
-	}
+// 	list, err := m.fetch(ctx, query, title)
+// 	if err != nil {
+// 		return
+// 	}
 
-	if len(list) > 0 {
-		res = list[0]
-	} else {
-		return nil, models.ErrNotFound
-	}
-	return
-}
+// 	if len(list) > 0 {
+// 		res = list[0]
+// 	} else {
+// 		return nil, models.ErrNotFound
+// 	}
+// 	return
+// }
 
 func (m *mysqlOrderRepository) Store(ctx context.Context, a *models.Order) error {
 	query := `INSERT  order SET title=? , content=? , author_id=?, updated_at=? , created_at=?`

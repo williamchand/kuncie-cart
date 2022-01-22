@@ -8,10 +8,11 @@ import (
 
 // Repository represent the order's repository contract
 type Repository interface {
-	Fetch(ctx context.Context, cursor string, num int64) (res []*models.Order, nextCursor string, err error)
-	GetByID(ctx context.Context, id int64) (*models.Order, error)
-	GetByTitle(ctx context.Context, title string) (*models.Order, error)
-	Update(ctx context.Context, ar *models.Order) error
-	Store(ctx context.Context, a *models.Order) error
-	Delete(ctx context.Context, id int64) error
+	GetItems(ctx context.Context, id []int64) (res []*models.Order, err error)
+	GetCart(ctx context.Context, id int64) (res []*models.Cart, err error)
+	GetPromotions(ctx context.Context, id int64) (*models.Promotions, error)
+	CreateCart(ctx context.Context, a *models.Cart) error
+	CreateOrder(ctx context.Context, a *models.Order) error
+	CreateOrderDetails(ctx context.Context, a *models.OrderDetails) error
+	DeleteCart(ctx context.Context, id int64) error
 }
