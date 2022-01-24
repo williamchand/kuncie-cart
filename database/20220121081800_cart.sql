@@ -119,7 +119,6 @@ CREATE TABLE `order_details` (
   `name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `price` FLOAT DEFAULT '0.00',
   `quantity` int(11) DEFAULT '0',
-  `promo_type` varchar(20) COLLATE utf8_unicode_ci,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)

@@ -12,7 +12,6 @@ type OrderDetails struct {
 	Name      string    `json:"name" validate:"required"`
 	Price     float64   `json:"price" validate:"required"`
 	Quantity  int64     `json:"quantity" validate:"required"`
-	PromoType string    `json:"promo_type"`
 	UpdatedAt time.Time `json:"updated_at"`
 	CreatedAt time.Time `json:"created_at"`
 }
@@ -31,7 +30,7 @@ type Promotions struct {
 	ItemsID             int64  `json:"items_id" validate:"required"`
 	PromoType           string `json:"promo_type" validate:"required"`
 	Promo               string `json:"promo" validate:"required"`
-	QuantityRequirement string `json:"quantity_requirement" validate:"required"`
+	QuantityRequirement int64  `json:"quantity_requirement" validate:"required"`
 }
 
 type Items struct {

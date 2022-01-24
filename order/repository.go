@@ -9,7 +9,8 @@ import (
 // Repository represent the order's repository contract
 type Repository interface {
 	GetItems(ctx context.Context, sku []string) (res []*models.Items, err error)
-	GetCart(ctx context.Context, id int64) (res []*models.Cart, err error)
+	GetItemsById(ctx context.Context, id []int64) (res []*models.Items, err error)
+	GetCart(ctx context.Context) (res []*models.Cart, err error)
 	GetPromotions(ctx context.Context, id int64) (*models.Promotions, error)
 	CreateCart(ctx context.Context, a *models.Cart) error
 	UpdateCart(ctx context.Context, a *models.Cart) error

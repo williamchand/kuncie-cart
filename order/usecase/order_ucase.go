@@ -34,11 +34,22 @@ func (a *orderUsecase) GetItems(c context.Context, sku []string) (result []*mode
 	return res, nil
 }
 
-func (a *orderUsecase) GetCart(c context.Context, id int64) (result []*models.Cart, err error) {
+func (a *orderUsecase) GetItemsById(c context.Context, id []int64) (result []*models.Items, err error) {
 
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
 	defer cancel()
-	res, err := a.orderRepo.GetCart(ctx, id)
+	res, err := a.orderRepo.GetItemsById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+func (a *orderUsecase) GetCart(c context.Context) (result []*models.Cart, err error) {
+
+	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+	defer cancel()
+	res, err := a.orderRepo.GetCart(ctx)
 	if err != nil {
 		return nil, err
 	}
