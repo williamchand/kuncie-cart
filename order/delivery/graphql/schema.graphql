@@ -16,9 +16,10 @@ type Cart {
 }
 
 type Query {
+  Placeholder(): String
 }
 
 type Mutation {
     AddCart(sku: String, quantity: Int): Cart
-    ConfirmOrder(): Order
+    ConfirmOrder(placeholder: String): Order
 }

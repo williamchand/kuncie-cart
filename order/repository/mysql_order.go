@@ -114,7 +114,7 @@ func (m *mysqlOrderRepository) GetItems(ctx context.Context, sku []string) (res 
 }
 
 func (m *mysqlOrderRepository) GetPromotions(ctx context.Context, id int64) (res *models.Promotions, err error) {
-	query := `SELECT id,items_id,promo_type,promo,quantity_requirement
+	query := `SELECT id, items_id, promo_type, promo, quantity_requirement
   						FROM promotions WHERE items_id = ?`
 	rows, err := m.Conn.QueryContext(ctx, query, id)
 	if err != nil {
@@ -129,20 +129,33 @@ func (m *mysqlOrderRepository) GetPromotions(ctx context.Context, id int64) (res
 		}
 	}()
 
-	rows.Next()
-	err = rows.Scan(
-		&res.ID,
-		&res.ItemsID,
-		&res.PromoType,
-		&res.Promo,
-		&res.QuantityRequirement,
-	)
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}()
 
-	if err != nil {
-		logrus.Error(err)
-		return nil, err
+	result := make([]*models.Promotions, 0)
+	for rows.Next() {
+		t := new(models.Promotions)
+		err = rows.Scan(
+			&t.ID,
+			&t.ItemsID,
+			&t.PromoType,
+			&t.Promo,
+			&t.QuantityRequirement,
+		)
+
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+		result = append(result, t)
 	}
-
+	if len(result) > 0 {
+		return result[0], nil
+	}
 	return res, nil
 }
 
@@ -205,12 +218,11 @@ func (m *mysqlOrderRepository) CreateCart(ctx context.Context, a *models.Cart) e
 }
 
 func (m *mysqlOrderRepository) CreateOrder(ctx context.Context, a *models.Order) error {
-	query := `INSERT order SET total_price=? , updated_at=? , created_at=?`
+	query := "INSERT `" + "order" + "` SET total_price=?, updated_at=?, created_at=?"
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
 	}
-
 	res, err := stmt.ExecContext(ctx, a.TotalPrice, a.UpdatedAt, a.CreatedAt)
 	if err != nil {
 		return err
@@ -232,7 +244,7 @@ func (m *mysqlOrderRepository) CreateOrderDetails(ctx context.Context, a *models
 		return err
 	}
 
-	res, err := stmt.ExecContext(ctx, a.OrderID, a.SKU, a.Name, a.Price, a.Quantity, a.UpdatedAt, a.CreatedAt)
+	res, err := stmt.ExecContext(ctx, a.OrderID, a.SKU, a.Name, a.Price, a.Quantity, a.PromoType, a.UpdatedAt, a.CreatedAt)
 	if err != nil {
 		return err
 	}
@@ -246,14 +258,14 @@ func (m *mysqlOrderRepository) CreateOrderDetails(ctx context.Context, a *models
 	return nil
 }
 func (m *mysqlOrderRepository) UpdateCart(ctx context.Context, ar *models.Cart) error {
-	query := `UPDATE cart set items_id=?, quantity=?, updated_at=?, created_at=? WHERE id = ?`
+	query := `UPDATE cart set items_id=?, quantity=?, updated_at=? WHERE id = ?`
 
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return nil
 	}
 
-	res, err := stmt.ExecContext(ctx, ar.ItemsID, ar.Quantity, ar.UpdatedAt, ar.CreatedAt, ar.ID)
+	res, err := stmt.ExecContext(ctx, ar.ItemsID, ar.Quantity, ar.UpdatedAt, ar.ID)
 	if err != nil {
 		return err
 	}
@@ -270,6 +282,30 @@ func (m *mysqlOrderRepository) UpdateCart(ctx context.Context, ar *models.Cart) 
 	return nil
 }
 
+func (m *mysqlOrderRepository) UpdateItems(ctx context.Context, ar *models.Items) error {
+	query := `UPDATE items set inventory_quantity= inventory_quantity - ?, updated_at=? WHERE sku = ?`
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return nil
+	}
+
+	res, err := stmt.ExecContext(ctx, ar.InventoryQuantity, ar.UpdatedAt, ar.SKU)
+	if err != nil {
+		return err
+	}
+	affect, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affect != 1 {
+		err = fmt.Errorf("Weird  Behaviour. Total Affected: %d", affect)
+
+		return err
+	}
+
+	return nil
+}
 func (m *mysqlOrderRepository) DeleteCart(ctx context.Context) error {
 	query := "DELETE FROM cart"
 

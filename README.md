@@ -42,4 +42,38 @@ $ curl localhost:9090/kuncie-cart
 
 # Stop
 $ make stop
+
+## Query add cart
+```
+mutation AddCart($sku: String, $quantity: Int) {
+  AddCart(sku: $sku, quantity: $quantity) {
+    id
+    items_id
+    quantity
+  }
+}
+
+```
+### Query variables
+```
+{
+  "quantity": 1,
+  "sku": "120P90"
+}
+```
+## Query order items at cart
+```
+mutation ConfirmOrder($placeholder: String) {
+  ConfirmOrder(placeholder: $placeholder) {
+    id
+    total_price
+  }
+}
+```
+
+### Query variables
+```
+{
+  "placeholder": ""
+}
 ```

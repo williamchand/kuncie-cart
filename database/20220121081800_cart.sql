@@ -76,7 +76,7 @@ CREATE TABLE `promotions` (
   `promo_type` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
   `promo` varchar(45) COLLATE utf8_unicode_ci NOT NULL,
   `quantity_requirement` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -87,7 +87,7 @@ CREATE TABLE `promotions` (
 LOCK TABLES `promotions` WRITE;
 /*!40000 ALTER TABLE `promotions` DISABLE KEYS */;
 INSERT INTO `promotions` VALUES (1,2,"free_items", "4", 1),(2,1,"bonus_price", "99.98", 3),(3,3,"discount_items", "0.1", 3);
-/*!40000 ALTER TABLE `order_category` ENABLE KEYS */;
+/*!40000 ALTER TABLE `promotions` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

@@ -16,13 +16,15 @@ import (
 
 func TestFetch(t *testing.T) {
 	mockOrderRepo := new(mocks.Repository)
-	mockOrder := &models.Order{
-		Title:   "Hello",
-		Content: "Content",
+	mockOrder := &models.Items{
+		SKU:               "Hello",
+		Name:              "Content",
+		Price:             3222223.0,
+		InventoryQuantity: 4,
 	}
 
-	mockListArtilce := make([]*models.Order, 0)
-	mockListArtilce = append(mockListArtilce, mockOrder)
+	mockListOrder := make([]*models.Items, 0)
+	mockListOrder = append(mockListOrder, mockOrder)
 
 	t.Run("success", func(t *testing.T) {
 		mockOrderRepo.On("Fetch", mock.Anything, mock.AnythingOfType("string"),

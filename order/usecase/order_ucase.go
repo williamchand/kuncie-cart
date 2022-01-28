@@ -102,6 +102,15 @@ func (a *orderUsecase) CreateOrderDetails(c context.Context, m *models.OrderDeta
 	return nil
 }
 
+func (a *orderUsecase) UpdateItems(c context.Context, ar *models.Items) error {
+
+	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+	defer cancel()
+
+	ar.UpdatedAt = time.Now()
+	return a.orderRepo.UpdateItems(ctx, ar)
+}
+
 func (a *orderUsecase) UpdateCart(c context.Context, ar *models.Cart) error {
 
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)

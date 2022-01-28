@@ -13,6 +13,7 @@ type Usecase interface {
 	GetCart(ctx context.Context) (res []*models.Cart, err error)
 	GetPromotions(ctx context.Context, id int64) (*models.Promotions, error)
 	CreateCart(ctx context.Context, a *models.Cart) error
+	UpdateItems(ctx context.Context, a *models.Items) error
 	UpdateCart(ctx context.Context, a *models.Cart) error
 	CreateOrder(ctx context.Context, a *models.Order) error
 	CreateOrderDetails(ctx context.Context, a *models.OrderDetails) error

@@ -55,8 +55,15 @@ type Schema struct {
 // Query initializes config schema query for graphql server.
 func (s Schema) Query() *graphql.Object {
 	objectConfig := graphql.ObjectConfig{
-		Name:   "Query",
-		Fields: graphql.Fields{},
+		Name: "Query",
+		Fields: graphql.Fields{
+			"Placeholder": &graphql.Field{
+				Type:        graphql.String,
+				Description: "Confirm all order at the cart",
+				Args:        graphql.FieldConfigArgument{},
+				Resolve:     s.orderResolver.Placeholder,
+			},
+		},
 	}
 
 	return graphql.NewObject(objectConfig)
@@ -68,13 +75,17 @@ func (s Schema) Mutation() *graphql.Object {
 		Name: "Mutation",
 		Fields: graphql.Fields{
 			"ConfirmOrder": &graphql.Field{
-				Type:        graphql.String,
+				Type:        OrderGraphQL,
 				Description: "Confirm all order at the cart",
-				Args:        graphql.FieldConfigArgument{},
-				Resolve:     s.orderResolver.ConfirmOrder,
+				Args: graphql.FieldConfigArgument{
+					"placeholder": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+				},
+				Resolve: s.orderResolver.ConfirmOrder,
 			},
 			"AddCart": &graphql.Field{
-				Type:        graphql.String,
+				Type:        CartGraphQL,
 				Description: "Store a new order",
 				Args: graphql.FieldConfigArgument{
 					"sku": &graphql.ArgumentConfig{

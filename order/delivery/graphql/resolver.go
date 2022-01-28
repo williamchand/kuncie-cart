@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"time"
 
 	"github.com/graphql-go/graphql"
 	"github.com/williamchand/kuncie-cart/models"
@@ -12,6 +13,7 @@ import (
 )
 
 type Resolver interface {
+	Placeholder(params graphql.ResolveParams) (interface{}, error)
 	AddCart(params graphql.ResolveParams) (interface{}, error)
 	ConfirmOrder(params graphql.ResolveParams) (interface{}, error)
 }
@@ -20,11 +22,17 @@ type resolver struct {
 	orderService order.Usecase
 }
 
+func (r resolver) Placeholder(params graphql.ResolveParams) (interface{}, error) {
+	return "", nil
+}
 func (r resolver) ConfirmOrder(params graphql.ResolveParams) (interface{}, error) {
 	var ()
 
 	ctx := context.Background()
 	carts, err := r.orderService.GetCart(ctx)
+	if len(carts) == 0 {
+		return nil, fmt.Errorf("cart is empty")
+	}
 	promotion_carts := make([]*models.Cart, 0)
 	order := make([]*models.OrderDetails, 0)
 	for i := range carts {
@@ -62,23 +70,22 @@ func (r resolver) ConfirmOrder(params graphql.ResolveParams) (interface{}, error
 				Price:     price,
 				Quantity:  carts[i].Quantity,
 				PromoType: "",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
 			})
-		} else if promotion.PromoType == "bonus_price" {
-			promoValue, err := strconv.ParseFloat(promotion.Promo, 64)
-			if err != nil {
-				return nil, err
-			}
+		} else {
+			promoValue, _ := strconv.ParseFloat(promotion.Promo, 64)
 			price := 0.0
 			if promotion.PromoType == "bonus_price" {
 				price = item_detail[0].Price*float64(carts[i].Quantity%promotion.QuantityRequirement) + promoValue*math.Floor(float64(carts[i].Quantity)/float64(promotion.QuantityRequirement))
-			} else if promotion.PromoType == "discount_items" {
+			} else {
 				price = item_detail[0].Price * float64(carts[i].Quantity)
-				if promotion.QuantityRequirement >= carts[i].Quantity {
+				if promotion.PromoType == "discount_items" && promotion.QuantityRequirement >= carts[i].Quantity {
 					price = price * promoValue
 				}
 			}
 			promo_type := ""
-			if promotion.QuantityRequirement >= carts[i].Quantity {
+			if promotion.QuantityRequirement <= carts[i].Quantity {
 				promo_type = promotion.PromoType
 			}
 			order = append(order, &models.OrderDetails{
@@ -87,6 +94,8 @@ func (r resolver) ConfirmOrder(params graphql.ResolveParams) (interface{}, error
 				Price:     price,
 				Quantity:  carts[i].Quantity,
 				PromoType: promo_type,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
 			})
 		}
 	}
@@ -102,6 +111,8 @@ func (r resolver) ConfirmOrder(params graphql.ResolveParams) (interface{}, error
 			Price:     0.0,
 			Quantity:  promotion_carts[i].Quantity,
 			PromoType: "free_items",
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		})
 	}
 	if err != nil {
@@ -109,6 +120,8 @@ func (r resolver) ConfirmOrder(params graphql.ResolveParams) (interface{}, error
 	}
 	createOrder := &models.Order{
 		TotalPrice: 0.0,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
 	}
 	for i := range order {
 		createOrder.TotalPrice += order[i].Price
@@ -124,14 +137,26 @@ func (r resolver) ConfirmOrder(params graphql.ResolveParams) (interface{}, error
 			return nil, err
 		}
 	}
-
+	if err := r.orderService.DeleteCart(ctx); err != nil {
+		return nil, err
+	}
+	for i := range order {
+		item_update := &models.Items{
+			SKU:               order[i].SKU,
+			InventoryQuantity: order[i].Quantity,
+			UpdatedAt:         time.Now(),
+		}
+		if err := r.orderService.UpdateItems(ctx, item_update); err != nil {
+			return nil, err
+		}
+	}
 	return *createOrder, nil
 }
 
 func (r resolver) AddCart(params graphql.ResolveParams) (interface{}, error) {
 	var (
 		sku      string
-		quantity int64
+		quantity int
 		ok       bool
 	)
 
@@ -148,26 +173,28 @@ func (r resolver) AddCart(params graphql.ResolveParams) (interface{}, error) {
 	if len(items) == 0 {
 		return nil, fmt.Errorf("sku is not valid value")
 	}
-	if quantity, ok = params.Args["quantity"].(int64); !ok || quantity == 0 {
+	if quantity, ok = params.Args["quantity"].(int); !ok || quantity == 0 {
 		return nil, fmt.Errorf("quantity is not integer or zero")
 	}
-
+	quantityint64 := int64(quantity)
 	carts, err := r.orderService.GetCart(ctx)
 	if err != nil {
 		return nil, err
 	}
 	found := int64(0)
+	foundID := int64(0)
 	for i := range carts {
 		if carts[i].ItemsID == items[0].ID {
-			carts[i].Quantity += quantity
+			carts[i].Quantity += quantityint64
 			found = carts[i].Quantity
+			foundID = carts[i].ID
 			break
 		}
 	}
 	if found == 0 {
 		carts = append(carts, &models.Cart{
 			ItemsID:  items[0].ID,
-			Quantity: quantity,
+			Quantity: quantityint64,
 		})
 	}
 	promotion_carts := make([]*models.Cart, 0)
@@ -198,7 +225,7 @@ func (r resolver) AddCart(params graphql.ResolveParams) (interface{}, error) {
 		if !found_promotion {
 			carts = append(carts, &models.Cart{
 				ItemsID:  promotion_carts[i].ItemsID,
-				Quantity: quantity,
+				Quantity: quantityint64,
 			})
 		}
 	}
@@ -221,13 +248,16 @@ func (r resolver) AddCart(params graphql.ResolveParams) (interface{}, error) {
 		}
 	}
 	cartsAns := &models.Cart{
-		ItemsID:  items[0].ID,
-		Quantity: quantity,
+		ItemsID:   items[0].ID,
+		Quantity:  quantityint64,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 	if found == 0 {
 		err = r.orderService.CreateCart(ctx, cartsAns)
 	} else {
 		cartsAns.Quantity = found
+		cartsAns.ID = foundID
 		err = r.orderService.UpdateCart(ctx, cartsAns)
 	}
 	if err != nil {
