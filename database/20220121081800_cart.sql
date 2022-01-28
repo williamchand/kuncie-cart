@@ -86,7 +86,7 @@ CREATE TABLE `promotions` (
 
 LOCK TABLES `promotions` WRITE;
 /*!40000 ALTER TABLE `promotions` DISABLE KEYS */;
-INSERT INTO `promotions` VALUES (1,2,"free_items", "4", 1),(2,1,"bonus_price", "99.98", 3),(3,3,"discount_items", "10.0", 3);
+INSERT INTO `promotions` VALUES (1,2,"free_items", "4", 1),(2,1,"bonus_price", "99.98", 3),(3,3,"discount_items", "0.1", 3);
 /*!40000 ALTER TABLE `order_category` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -119,6 +119,7 @@ CREATE TABLE `order_details` (
   `name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `price` FLOAT DEFAULT '0.00',
   `quantity` int(11) DEFAULT '0',
+  `promo_type` varchar(100) COLLATE utf8_unicode_ci,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)

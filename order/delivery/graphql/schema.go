@@ -8,13 +8,10 @@ var OrderGraphQL = graphql.NewObject(
 		Name: "Order",
 		Fields: graphql.Fields{
 			"id": &graphql.Field{
-				Type: graphql.String,
+				Type: graphql.Int,
 			},
-			"title": &graphql.Field{
-				Type: graphql.String,
-			},
-			"content": &graphql.Field{
-				Type: graphql.String,
+			"total_price": &graphql.Field{
+				Type: graphql.Float,
 			},
 			"updated_at": &graphql.Field{
 				Type: graphql.DateTime,
@@ -26,45 +23,25 @@ var OrderGraphQL = graphql.NewObject(
 	},
 )
 
-// OrderEdgeGraphQL holds order edge information with graphql object
-var OrderEdgeGraphQL = graphql.NewObject(
+// CartGraphQL holds order information with graphql object
+var CartGraphQL = graphql.NewObject(
 	graphql.ObjectConfig{
-		Name: "OrderEdge",
+		Name: "Cart",
 		Fields: graphql.Fields{
-			"node": &graphql.Field{
-				Type: OrderGraphQL,
+			"id": &graphql.Field{
+				Type: graphql.Int,
 			},
-			"cursor": &graphql.Field{
-				Type: graphql.String,
+			"items_id": &graphql.Field{
+				Type: graphql.Int,
 			},
-		},
-	},
-)
-
-// OrderResultGraphQL holds order result information with graphql object
-var OrderResultGraphQL = graphql.NewObject(
-	graphql.ObjectConfig{
-		Name: "OrderResult",
-		Fields: graphql.Fields{
-			"edges": &graphql.Field{
-				Type: graphql.NewList(OrderEdgeGraphQL),
+			"quantity": &graphql.Field{
+				Type: graphql.Int,
 			},
-			"pageInfo": &graphql.Field{
-				Type: pageInfoGraphQL,
+			"updated_at": &graphql.Field{
+				Type: graphql.DateTime,
 			},
-		},
-	},
-)
-
-var pageInfoGraphQL = graphql.NewObject(
-	graphql.ObjectConfig{
-		Name: "PageInfo",
-		Fields: graphql.Fields{
-			"endCursor": &graphql.Field{
-				Type: graphql.String,
-			},
-			"hasNextPage": &graphql.Field{
-				Type: graphql.Boolean,
+			"created_at": &graphql.Field{
+				Type: graphql.DateTime,
 			},
 		},
 	},

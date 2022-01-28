@@ -2,32 +2,23 @@ scalar Time
 
 type Order {
     ID: Int
-    Title: String
-    Content: String
+    TotalPrice: Float
     UpdatedAt: Time
     CreatedAt: Time
 }
 
-type Edge {
-    cursor: String
-    node: Order
-}
-
-type PageInfo {
-    endCursor: String
-    hasNextPage: Boolean
-}
-
-type OrdersResult {
-    edges: [Edge]
-    pageInfo: PageInfo
-    totalCount: Int
+type Cart {
+    ID: Int
+    ItemsID: Float
+    Quantity: Int
+    UpdatedAt: Time
+    CreatedAt: Time
 }
 
 type Query {
 }
 
 type Mutation {
-    AddCart(sku: String, quantity: Int): Order
+    AddCart(sku: String, quantity: Int): Cart
     ConfirmOrder(): Order
 }

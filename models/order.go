@@ -12,6 +12,7 @@ type OrderDetails struct {
 	Name      string    `json:"name" validate:"required"`
 	Price     float64   `json:"price" validate:"required"`
 	Quantity  int64     `json:"quantity" validate:"required"`
+	PromoType string    `json:"promo_type"`
 	UpdatedAt time.Time `json:"updated_at"`
 	CreatedAt time.Time `json:"created_at"`
 }
